@@ -1,5 +1,5 @@
 use diffsol::{CraneliftJitModule, MatrixCommon, NalgebraMat, OdeBuilder, OdeSolverMethod};
-use plotly::{Plot, Scatter, layout::Axis, layout::Layout};
+use plotly::{layout::{Axis, Layout}, ImageFormat, Plot, Scatter};
 
 type M = diffsol::NalgebraMat<f64>;
 type CG = CraneliftJitModule;
@@ -59,8 +59,8 @@ impl Community {
             .y_axis(Axis::new().title("Population"));
         plot.set_layout(layout);
 
-        plot.write_html("plot.html");
-
+        plot.write_image("assets/abrams_strogatz/plot.png", ImageFormat::PNG, 800, 600, 1.0);
+;
         // Generate phase plot comparing x_0 and x_1
         let mut plot = Plot::new();
         let mono =
@@ -70,7 +70,7 @@ impl Community {
             .x_axis(Axis::new().title("Monolingual Underrepresented"))
             .y_axis(Axis::new().title("Monolingual Dominant"));
         plot.set_layout(layout);
-        plot.write_html("plot2.html");
+        plot.write_image("assets/abrams_strogatz/phase.png", ImageFormat::PNG, 800, 600, 1.0);
 
         ys
     }

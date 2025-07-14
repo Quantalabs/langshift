@@ -5,5 +5,5 @@ edition = "2024"
 
 [dependencies]
 diffsol = { version = "0.6.4", features = ["diffsl", "diffsl-cranelift"] }
-plotly = { version = "0.13.3", features = ["static_export_default"] }
+plotly = { version = "0.13", features = ["kaleido", "kaleido_download"] }
 yew = { version = "0.21.0", features = ["csr"] }

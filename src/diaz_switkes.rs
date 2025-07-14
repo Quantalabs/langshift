@@ -1,7 +1,7 @@
 use diffsol::{
     CraneliftJitModule, NalgebraMat, OdeBuilder, OdeSolverMethod, MatrixCommon
 };
-use plotly::{layout::Axis, layout::Layout, Plot, Scatter};
+use plotly::{layout::Axis, layout::Layout, ImageFormat, Plot, Scatter};
 
 type M = diffsol::NalgebraMat<f64>;
 type LS = diffsol::NalgebraLU<f64>;
@@ -64,8 +64,8 @@ impl Community {
                 );
             plot.set_layout(layout);
 
-            plot.write_html("plot.html");
-
+            plot.write_image("assets/diaz_switkes/plot.png", ImageFormat::PNG, 800, 600, 1.0);
+;
             // Generate phase plot comparing x_0 and x_1
             let mut plot = Plot::new();
             let mono = Scatter::new(mono_dom.clone(), mono_under.clone()).name("Monolingual Underrepresented");
@@ -78,7 +78,7 @@ impl Community {
                     .title("Monolingual Underrepresented")
                 );
             plot.set_layout(layout);
-            plot.write_html("plot2.html");
+            plot.write_image("assets/diaz_switkes/phase.png", ImageFormat::PNG, 800, 600, 1.0);
 
             ys
     }
