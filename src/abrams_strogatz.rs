@@ -22,21 +22,19 @@ impl Community {
 
     pub fn solve(&self, t: f64) -> Vec<f64> {
         let problem = ODEProblem::new(
-            self.clone(),
+            *self,
             0.0,
             t,
-            self.y as f64 / self.n() as f64,
+            self.y / (self.n() as f64),
         );
 
         let mut solver = ExplicitRungeKutta::dop853()
             .rtol(1e-8)
             .atol(1e-6);
 
-        let solution = match problem.solve(&mut solver) {
+        match problem.solve(&mut solver) {
             Ok(y) => y,
             Err(e) => panic!("{}", e),
-        }.iter().map(|(_, y)| y.clone()).collect();
-
-        solution
+        }.iter().map(|(_, y)| *y).collect()
     }
 }

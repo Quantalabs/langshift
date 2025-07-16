@@ -37,7 +37,7 @@ impl Community {
 
     pub fn solve(&self, t: f64) -> Vec<Vec<f64>> {
         let problem = ODEProblem::new(
-            self.clone(),
+            *self,
             0.0,
             t,
             vector![self.x[0] as f64, self.x[1] as f64, self.x[2] as f64],
