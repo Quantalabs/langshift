@@ -1,9 +1,6 @@
-use diffsol::{CraneliftJitModule, MatrixCommon, NalgebraMat, OdeBuilder, OdeSolverMethod};
-use plotly::{layout::{Axis, Layout}, ImageFormat, Plot, Scatter};
+use differential_equations::prelude::*;
 
-type M = diffsol::NalgebraMat<f64>;
-type CG = CraneliftJitModule;
-
+#[derive(Copy, Clone)]
 pub struct Community {
     pub x: f64,
     pub y: f64,
@@ -12,66 +9,34 @@ pub struct Community {
     pub s: f64,
 }
 
+impl ODE for Community {
+    fn diff(&self, _t: f64, y: &f64, dydt: &mut f64) {
+        *dydt = (1.0 - y) * self.c * y.powf(self.a) * self.s - y * self.c * (1.0 - y).powf(self.a) * (1.0 - self.s);
+    }
+}
+
 impl Community {
     pub fn n(&self) -> u32 {
         (self.x + self.y) as u32
     }
 
-    pub fn solve(&self, t: f64) -> NalgebraMat<f64> {
-        let problem = OdeBuilder::<M>::new()
-            .build_from_diffsl::<CG>(&format!(
-                "
-                    c {{ {} }} a {{ {} }} s {{ {} }}
-                    u_i {{
-                        x = {},
-                    }}
-                    F_i {{
-                        (1 - x) * c * pow(x, a) * s - x * c * pow(1 - x, a) * (1 - s),
-                    }}
-                ",
-                self.c,
-                self.a,
-                self.s,
-                self.x / self.n() as f64
-            ))
-            .unwrap();
+    pub fn solve(&self, t: f64) -> Vec<f64> {
+        let problem = ODEProblem::new(
+            self.clone(),
+            0.0,
+            t,
+            self.y as f64 / self.n() as f64,
+        );
 
-        let mut solver = problem.tsit45().unwrap();
-        let (ys, ts) = solver.solve(t).unwrap();
+        let mut solver = ExplicitRungeKutta::dop853()
+            .rtol(1e-8)
+            .atol(1e-6);
 
-        let x = ys.inner().row(0).into_iter().copied().collect::<Vec<_>>();
-        let time = ts.into_iter().collect::<Vec<_>>();
+        let solution = match problem.solve(&mut solver) {
+            Ok(y) => y,
+            Err(e) => panic!("{}", e),
+        }.iter().map(|(_, y)| y.clone()).collect();
 
-        let mut plot = Plot::new();
-        let x_plot = Scatter::new(
-            time.clone(),
-            x
-                .clone()
-                .iter()
-                .map(|x| x * self.n() as f64)
-                .collect(),
-        )
-        .name("Monolingual Dominant");
-        plot.add_trace(x_plot);
-
-        let layout = Layout::new()
-            .x_axis(Axis::new().title("Time"))
-            .y_axis(Axis::new().title("Population"));
-        plot.set_layout(layout);
-
-        plot.write_image("assets/abrams_strogatz/plot.png", ImageFormat::PNG, 800, 600, 1.0);
-;
-        // Generate phase plot comparing x_0 and x_1
-        let mut plot = Plot::new();
-        let mono =
-            Scatter::new(x.clone().iter().map(|x| x * self.n() as f64).collect(), x.clone().iter().map(|x| self.n() as f64 - x * self.n() as f64).collect()).name("Monolingual Underrepresented");
-        plot.add_trace(mono);
-        let layout = Layout::new()
-            .x_axis(Axis::new().title("Monolingual Underrepresented"))
-            .y_axis(Axis::new().title("Monolingual Dominant"));
-        plot.set_layout(layout);
-        plot.write_image("assets/abrams_strogatz/phase.png", ImageFormat::PNG, 800, 600, 1.0);
-
-        ys
+        solution
     }
 }

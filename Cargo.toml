@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-diffsol = { version = "0.6.4", features = ["diffsl", "diffsl-cranelift"] }
-plotly = { version = "0.13", features = ["kaleido", "kaleido_download"] }
-yew = { version = "0.21.0", features = ["csr"] }
+differential-equations = "0.3.1"
+nalgebra = "0.33.2"
+wasm-bindgen = "0.2.100"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
