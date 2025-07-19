@@ -3,18 +3,18 @@
     <head>
         <meta charset="utf-8" />
         <title>Lang Shift</title>
+        <link data-trunk rel="rust"/>
     </head>
     <body>
         <div id="abrams"></div>
         <div id="diaz"></div>
 
         <script type="module">
-            import init, { solve_abrams_strogatz, solve_diaz_switkes } from './pkg/langshift.js';
             import "https://cdn.plot.ly/plotly-3.1.0-rc.0.min.js"
 
-            async function run() {
-                await init();
+            let { solve_abrams_strogatz, solve_diaz_switkes } = wasmBindings;
 
+            async function run() {
                 Plotly.newPlot('abrams', [
                     { 
                         "y": solve_abrams_strogatz(80, 20, 0.2, 1.31, 0.33, 200),
