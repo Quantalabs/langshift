@@ -42,7 +42,7 @@ impl Community {
             .iter()
             .enumerate()
             .filter(|(i, _)| i % 2 == 0)
-            .map(|(_, y)| y.clone())
+            .map(|(_, y)| y.clone().iter().map(|y| y * (self.n() as f64)).collect())
             .collect()
     }
 }
