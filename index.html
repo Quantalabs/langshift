@@ -3,18 +3,29 @@
     <head>
         <meta charset="utf-8" />
         <title>Lang Shift</title>
-    <link rel="modulepreload" href="/langshift-54d88d2bf8e58495.js" crossorigin="anonymous" integrity="sha384-giUBHKbPxnZdmDCP/B+2Bobd2nIuQAQDj6RqzafFShXc2yM9I/+FArUMMz9CXSfo"><link rel="preload" href="/langshift-54d88d2bf8e58495_bg.wasm" crossorigin="anonymous" integrity="sha384-S9jfvZULOGhGbkHJ3MvxP/fhiNZANKxCmBISG4tkuj5Dup/vMuIt4dIIkK3frfvw" as="fetch" type="application/wasm"></head>
+        
+<script type="module">
+import init, * as bindings from '/langshift-54d88d2bf8e58495.js';
+const wasm = await init({ module_or_path: '/langshift-54d88d2bf8e58495_bg.wasm' });
+
+
+window.wasmBindings = bindings;
+
+
+dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
+
+</script>
+    <link rel="modulepreload" href="/langshift-54d88d2bf8e58495.js" crossorigin="anonymous" integrity="sha384-giUBHKbPxnZdmDCP/B+2Bobd2nIuQAQDj6RqzafFShXc2yM9I/+FArUMMz9CXSfo"><link rel="preload" href="/langshift-54d88d2bf8e58495_bg.wasm" crossorigin="anonymous" integrity="sha384-AwE5UYS+uJpBQJUXNovxFQV1fEFwWOP58x2B0eQMDo3byPumbJtxkXL7kDYnqg7m" as="fetch" type="application/wasm"></head>
     <body>
         <div id="abrams"></div>
         <div id="diaz"></div>
 
         <script type="module">
-            import init, { solve_abrams_strogatz, solve_diaz_switkes } from './pkg/langshift.js';
             import "https://cdn.plot.ly/plotly-3.1.0-rc.0.min.js"
 
-            async function run() {
-                await init();
+            let { solve_abrams_strogatz, solve_diaz_switkes } = wasmBindings;
 
+            async function run() {
                 Plotly.newPlot('abrams', [
                     { 
                         "y": solve_abrams_strogatz(80, 20, 0.2, 1.31, 0.33, 200),
@@ -65,16 +76,5 @@
 
             run();
         </script>
-    
-<script type="module">
-import init, * as bindings from '/langshift-54d88d2bf8e58495.js';
-const wasm = await init({ module_or_path: '/langshift-54d88d2bf8e58495_bg.wasm' });
-
-
-window.wasmBindings = bindings;
-
-
-dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
-
-</script></body>
+    </body>
 </html>
