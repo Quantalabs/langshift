@@ -5,8 +5,8 @@
         <title>Lang Shift</title>
         
 <script type="module">
-import init, * as bindings from '/langshift-54d88d2bf8e58495.js';
-const wasm = await init({ module_or_path: '/langshift-54d88d2bf8e58495_bg.wasm' });
+import init, * as bindings from '/langshift/langshift-54d88d2bf8e58495.js';
+const wasm = await init({ module_or_path: '/langshift/langshift-54d88d2bf8e58495_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -15,7 +15,7 @@ window.wasmBindings = bindings;
 dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
 </script>
-    <link rel="modulepreload" href="/langshift-54d88d2bf8e58495.js" crossorigin="anonymous" integrity="sha384-giUBHKbPxnZdmDCP/B+2Bobd2nIuQAQDj6RqzafFShXc2yM9I/+FArUMMz9CXSfo"><link rel="preload" href="/langshift-54d88d2bf8e58495_bg.wasm" crossorigin="anonymous" integrity="sha384-AwE5UYS+uJpBQJUXNovxFQV1fEFwWOP58x2B0eQMDo3byPumbJtxkXL7kDYnqg7m" as="fetch" type="application/wasm"></head>
+    <link rel="modulepreload" href="/langshift/langshift-54d88d2bf8e58495.js" crossorigin="anonymous" integrity="sha384-giUBHKbPxnZdmDCP/B+2Bobd2nIuQAQDj6RqzafFShXc2yM9I/+FArUMMz9CXSfo"><link rel="preload" href="/langshift/langshift-54d88d2bf8e58495_bg.wasm" crossorigin="anonymous" integrity="sha384-AwE5UYS+uJpBQJUXNovxFQV1fEFwWOP58x2B0eQMDo3byPumbJtxkXL7kDYnqg7m" as="fetch" type="application/wasm"></head>
     <body>
         <div id="abrams"></div>
         <div id="diaz"></div>
