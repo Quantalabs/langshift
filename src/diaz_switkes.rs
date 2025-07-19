@@ -1,12 +1,4 @@
-// use diffsol::{
-//     NalgebraMat, OdeBuilder, OdeSolverMethod
-// };
-
-// type M = diffsol::NalgebraMat<f64>;
-// type LS = diffsol::NalgebraLU<f64>;
-
-use differential_equations::prelude::*;
-use nalgebra::{SVector, vector};
+use diffeq::ode::{Ode, problem::OdeProblem};
 
 #[derive(Copy, Clone)]
 pub struct Community {
@@ -17,43 +9,40 @@ pub struct Community {
     pub beta: f64,
 }
 
-impl ODE<f64, SVector<f64, 3>> for Community {
-    fn diff(&self, _t: f64, y: &SVector<f64, 3>, dydt: &mut SVector<f64, 3>) {
-        dydt[0] = self.m[0] * y[0] * y[2] - self.m[1] * y[0] * y[1] + self.alpha * y[0];
-        dydt[1] = -self.m[0] * y[0] * y[2]
-            + self.m[0] * y[1] * y[2]
-            + self.m[1] * y[0] * y[1]
-            + self.m[1] * y[1] * y[0]
-            - self.alpha * y[0]
-            - self.beta * y[1];
-        dydt[2] = -self.m[0] * y[1] * y[2] - self.m[1] * y[1] * y[0] + self.beta * y[1];
-    }
-}
-
 impl Community {
     pub fn n(&self) -> u32 {
         self.x.iter().sum()
     }
 
-    pub fn solve(&self, t: f64) -> Vec<Vec<f64>> {
-        let problem = ODEProblem::new(
-            *self,
-            0.0,
-            t,
-            vector![self.x[0] as f64, self.x[1] as f64, self.x[2] as f64],
-        );
+    pub fn system(&self, _: f64, v: &Vec<f64>) -> Vec<f64> {
+        let (x_1, b, x_2) = (v[0], v[1], v[2]);
 
-        let mut solver = ExplicitRungeKutta::dop853()
-            .rtol(1e-8)
-            .atol(1e-6);
+        vec![
+            self.m[0] * x_1 * b - self.g[0] * x_1 * x_2 + self.alpha * x_1,
+            -self.m[0] * x_1 * b + self.m[1] * x_2 * b + self.g[0] * x_1 * x_2 
+                + self.g[1] * x_2 * x_1 - self.beta * x_2 - self.alpha * x_1,
+            - self.m[1] * x_2 * b - self.g[1] * x_2 * x_1 + self.beta * x_2
+        ]
+    }
 
-        let solution = match problem.solve(&mut solver) {
-            Ok(y) => y,
-            Err(e) => panic!("{}", e),
-        };
+    pub fn solve(&self, t: usize) -> Vec<Vec<f64>> {
+        let problem = OdeProblem::builder()
+            .tspan_linspace(0.0, t as f64, t * 2)
+            .fun(|_, y| self.system(0.0, y))
+            .init(vec![(self.x[0] as f64) / (self.n() as f64), (self.x[1] as f64) / (self.n() as f64), (self.x[2] as f64) / (self.n() as f64)])
+            .build()
+            .unwrap();
 
-        solution.iter().map(|(_, y)| {
-            vec![y[0], y[1], y[2]]
-        }).collect()
+        let solution = problem
+            .solve(Ode::Feuler, Default::default())
+            .unwrap();
+
+        solution
+            .yout
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| i % 2 == 0)
+            .map(|(_, y)| y.clone())
+            .collect()
     }
 }

@@ -5,9 +5,65 @@
         <title>Lang Shift</title>
     </head>
     <body>
+        <div id="abrams"></div>
+        <div id="diaz"></div>
 
         <script type="module">
-            import init, { solve_abrams_strogatz } from './pkg/langshift.js';
+            import init, { solve_abrams_strogatz, solve_diaz_switkes } from './pkg/langshift.js';
+            import "https://cdn.plot.ly/plotly-3.1.0-rc.0.min.js"
+
+            async function run() {
+                await init();
+
+                Plotly.newPlot('abrams', [
+                    { 
+                        "y": solve_abrams_strogatz(80, 20, 0.2, 1.31, 0.33, 200),
+                        "name": "Monolingual 1",
+                        "line": {
+                            "color": "red"
+                        } 
+                    },
+                    { 
+                        "y": solve_abrams_strogatz(80, 20, 0.2, 1.31, 0.33, 200).map(y => 100 - y),
+                        "name": "Monolingual 2",
+                        "line": {
+                            "color": "blue"
+                        } 
+                    }
+                ]);
+
+                Plotly.newPlot('diaz', [
+                    { 
+                        "y": solve_diaz_switkes(
+                            [33, 34, 33], [0.4, 0.6], [0.6, 0.01], 0.01, 0.2, 300, 0
+                        ),
+                        "name": "Monolingual 1",
+                        "line": {
+                            "color": "red"
+                        }
+                    },
+                    { 
+                        "y": solve_diaz_switkes(
+                            [33, 34, 33], [0.4, 0.6], [0.6, 0.01], 0.01, 0.2, 300, 1
+                        ),
+                        "name": "Bilingual",
+                        "line": {
+                            "color": "blue"
+                        } 
+                    },
+                    { 
+                        "y": solve_diaz_switkes(
+                            [33, 34, 33], [0.4, 0.6], [0.6, 0.01], 0.01, 0.2, 300, 2
+                        ),
+                        "name": "Monolingual 2",
+                        "line": {
+                            "color": "green"
+                        }
+                    }
+                ]);
+            }
+
+            run();
         </script>
     </body>
 </html>

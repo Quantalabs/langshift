@@ -4,9 +4,21 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-differential-equations = "0.3.1"
+console_error_panic_hook = "0.1.7"
+diffeq = "0.1.0"
 nalgebra = "0.33.2"
 wasm-bindgen = "0.2.100"
+
+[dependencies.web-sys]
+version = "0.3.4"
+features = [
+  'Document',
+  'Element',
+  'HtmlElement',
+  'Node',
+  'Window',
+]
+
 
 [lib]
 crate-type = ["cdylib", "rlib"]
