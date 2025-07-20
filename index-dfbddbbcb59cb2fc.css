@@ -1,0 +1,47 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
+
+body {
+	font-family: "Outfit", sans-serif;
+	font-optical-sizing: auto;
+	font-weight: 300;
+	font-style: normal;
+	margin: auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+}
+
+#container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+#form {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#abrams,
+#diaz,
+#general {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5rem;
+	margin: 2.5vh 0;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	max-width: 750px;
+}
+
+.item {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5rem;
+	align-items: center;
+}
