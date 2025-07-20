@@ -24,7 +24,7 @@ impl Community {
 
     pub fn solve(&self, t: usize) -> Vec<f64> {
         let problem = OdeProblem::builder()
-            .tspan_linspace(0.0, t as f64, t * 2)
+            .tspan_linspace(0.0, t as f64, t * 100)
             .fun(|_, y| self.system(0.0, y))
             .init(vec![self.x / (self.n() as f64)])
             .build()
@@ -38,7 +38,7 @@ impl Community {
             .yout
             .iter()
             .enumerate()
-            .filter(|(i, _)| i % 2 == 0)
+            .filter(|(i, _)| i % 100 == 0)
             .map(|(_, y)| y[0] * (self.n() as f64))
             .collect()
     }
