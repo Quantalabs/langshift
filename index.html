@@ -1,9 +1,9 @@
 <!doctype html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <title>Lang Shift</title>
-        
+	<head>
+		<meta charset="utf-8" />
+		<title>Lang Shift</title>
+		
 <script type="module">
 import init, * as bindings from '/langshift/langshift-a26a31be7f360ec6.js';
 const wasm = await init({ module_or_path: '/langshift/langshift-a26a31be7f360ec6_bg.wasm' });
@@ -15,121 +15,359 @@ window.wasmBindings = bindings;
 dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
 </script>
-    <link rel="modulepreload" href="/langshift/langshift-a26a31be7f360ec6.js" crossorigin="anonymous" integrity="sha384-giUBHKbPxnZdmDCP/B+2Bobd2nIuQAQDj6RqzafFShXc2yM9I/+FArUMMz9CXSfo"><link rel="preload" href="/langshift/langshift-a26a31be7f360ec6_bg.wasm" crossorigin="anonymous" integrity="sha384-ymew6hKrg1DFQ2D1qX7a15NgBDKYlI5wbQH6pn446uK/XaARR9MDvita3ybrnnt8" as="fetch" type="application/wasm"></head>
-    <body>
-        <div id="container">
-            <select id="model">
-                <option value="abrams">Abrams-Strogatz</option>
-                <option value="diaz">Diaz-Switkes</option>
-            </select>
-            <div id="params">
-                <div id="abrams">
-                    <label for="x">x</label>
-                    <input type="number" id="x" min="1" max="10000" value="80" />
-                    <label for="y">y</label>
-                    <input type="number" id="y" min="1" max="10000" value="20" />
-                    <label for="c">c</label>
-                    <input type="number" id="c" min="0" max="1" step="0.01" value="0.5" />
-                    <label for="a">a</label>
-                    <input type="number" id="a" min="0" max="10" step="0.01" value="1.35" />
-                    <label for="s">s</label>
-                    <input type="number" id="s" min="0" max="1" step="0.01" value="0.33" />
-                </div>
-                <div id="diaz" style="display: none">
-                    <label for="x_1">x<sub>1</sub></label>
-                    <input type="number" id="x_1" min="1" max="10000" value="33" />
-                    <label for="x_2">x<sub>2</sub></label>
-                    <input type="number" id="x_2" min="1" max="10000" value="33" />
-                    <label for="b">b</label>
-                    <input type="number" id="b" min="0" max="10000" value="34" />
-                    <label for="m_1">m<sub>1</sub></label>
-                    <input type="number" id="m_1" min="0" max="1" step="0.01" value="0.4" />
-                    <label for="m_2">m<sub>2</sub></label>
-                    <input type="number" id="m_2" min="0" max="1" step="0.01" value="0.6" />
-                    <label for="g_1">g<sub>1</sub></label>
-                    <input type="number" id="g_1" min="0" max="1" step="0.01" value="0.6" />
-                    <label for="g_2">g<sub>2</sub></label>
-                    <input type="number" id="g_2" min="0" max="1" step="0.01" value="0.01" />
-                    <label for="alpha">&alpha;</label>
-                    <input type="number" id="alpha" min="0" max="1" step="0.01" value="0.01" />
-                    <label for="beta">&beta;</label>
-                    <input type="number" id="beta" min="0" max="1" step="0.01" value="0.2" />
-                </div>
-                <label for="t">t</label>
-                <input type="number" id="t" min="1" max="1000" value="100" />
-                <button id="solve">Solve</button>
-            </div>
-            <div id="plot"></div>    
-        </div>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css"
+		/>
+		<style>
+			@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
 
-        <script type="module">
-            import "https://cdn.plot.ly/plotly-3.1.0-rc.0.min.js"
+			body {
+				font-family: "Outfit", sans-serif;
+				font-optical-sizing: auto;
+				font-weight: 300;
+				font-style: normal;
+				margin: auto;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				height: 100vh;
+			}
 
-            let { solve_abrams_strogatz, solve_diaz_switkes } = wasmBindings;
+			#container {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+			}
 
-            const model = document.getElementById("model").value;
-            document.getElementById("abrams").style.display = model === "abrams" ? "block" : "none";
-            document.getElementById("diaz").style.display = model === "diaz" ? "block" : "none";
+			#form {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+			}
 
-            document.getElementById("model").addEventListener("change", (e) => {
-                const model = e.target.value;
-                document.getElementById("abrams").style.display = model === "abrams" ? "block" : "none";
-                document.getElementById("diaz").style.display = model === "diaz" ? "block" : "none";
-            });
+			#abrams,
+			#diaz,
+			#general {
+				display: flex;
+				flex-direction: row;
+				gap: 0.5rem;
+				margin: 2.5vh 0;
+				align-items: center;
+				justify-content: center;
+				flex-wrap: wrap;
+				max-width: 750px;
+			}
 
-            document.getElementById("solve").addEventListener("click", async (e) => {
-                const model = document.getElementById("model").value;
-                const params = {
-                    abrams: {
-                        x: Number(document.getElementById("x").value),
-                        y: Number(document.getElementById("y").value),
-                        c: Number(document.getElementById("c").value),
-                        a: Number(document.getElementById("a").value),
-                        s: Number(document.getElementById("s").value)
-                    },
-                    diaz: {
-                        x_1: Number(document.getElementById("x_1").value),
-                        x_2: Number(document.getElementById("x_2").value),
-                        b: Number(document.getElementById("b").value),
-                        m_1: Number(document.getElementById("m_1").value),
-                        m_2: Number(document.getElementById("m_2").value),
-                        g_1: Number(document.getElementById("g_1").value),
-                        g_2: Number(document.getElementById("g_2").value),
-                        alpha: Number(document.getElementById("alpha").value),
-                        beta: Number(document.getElementById("beta").value)
-                    }
-                }[model];
-                const t = document.getElementById("t").value;
-                
-                if (model === "abrams") {
-                    const solution = await solve_abrams_strogatz(params.x, params.y, params.c, params.a, params.s, t);
-                    plot([solution, solution.map(y => (params.x + params.y) - y)]);
-                } else {
-                    const x = await solve_diaz_switkes([params.x_1, params.x_2, params.b], [params.m_1, params.m_2], [params.g_1, params.g_2], params.alpha, params.beta, t, 0);
-                    const b = await solve_diaz_switkes([params.x_1, params.x_2, params.b], [params.m_1, params.m_2], [params.g_1, params.g_2], params.alpha, params.beta, t, 1);
-                    plot([x, b, x.map((y, i) => (params.x_1 + params.x_2 + params.b) - (y + b[i]))]);
-                }
-            });
+			.item {
+				display: flex;
+				flex-direction: row;
+				gap: 0.5rem;
+				align-items: center;
+			}
+		</style>
+	<link rel="modulepreload" href="/langshift/langshift-a26a31be7f360ec6.js" crossorigin="anonymous" integrity="sha384-giUBHKbPxnZdmDCP/B+2Bobd2nIuQAQDj6RqzafFShXc2yM9I/+FArUMMz9CXSfo"><link rel="preload" href="/langshift/langshift-a26a31be7f360ec6_bg.wasm" crossorigin="anonymous" integrity="sha384-ymew6hKrg1DFQ2D1qX7a15NgBDKYlI5wbQH6pn446uK/XaARR9MDvita3ybrnnt8" as="fetch" type="application/wasm"></head>
+	<body>
+		<div id="container">
+			<div id="form">
+				<select id="model">
+					<option value="abrams">Abrams-Strogatz</option>
+					<option value="diaz">Diaz-Switkes</option>
+				</select>
+				<div id="params">
+					<div id="abrams">
+						<div class="item">
+							<label for="x">x</label>
+							<input
+								type="number"
+								id="x"
+								min="1"
+								max="10000"
+								value="80"
+							/>
+						</div>
+						<div class="item">
+							<label for="y">y</label>
+							<input
+								type="number"
+								id="y"
+								min="1"
+								max="10000"
+								value="20"
+							/>
+						</div>
+						<div class="item">
+							<label for="c">c</label>
+							<input
+								type="number"
+								id="c"
+								min="0"
+								max="1"
+								step="0.01"
+								value="0.5"
+							/>
+						</div>
+						<div class="item">
+							<label for="a">a</label>
+							<input
+								type="number"
+								id="a"
+								min="0"
+								max="10"
+								step="0.01"
+								value="1.35"
+							/>
+						</div>
+						<div class="item">
+							<label for="s">s</label>
+							<input
+								type="number"
+								id="s"
+								min="0"
+								max="1"
+								step="0.01"
+								value="0.33"
+							/>
+						</div>
+					</div>
+					<div id="diaz" style="display: none">
+						<div class="item">
+							<label for="x_1">x<sub>1</sub></label>
+							<input
+								type="number"
+								id="x_1"
+								min="1"
+								max="10000"
+								value="33"
+							/>
+						</div>
+						<div class="item">
+							<label for="x_2">x<sub>2</sub></label>
+							<input
+								type="number"
+								id="x_2"
+								min="1"
+								max="10000"
+								value="33"
+							/>
+						</div>
+						<div class="item">
+							<label for="b">b</label>
+							<input
+								type="number"
+								id="b"
+								min="0"
+								max="10000"
+								value="34"
+							/>
+						</div>
+						<div class="item">
+							<label for="m_1">m<sub>1</sub></label>
+							<input
+								type="number"
+								id="m_1"
+								min="0"
+								max="1"
+								step="0.01"
+								value="0.4"
+							/>
+						</div>
+						<div class="item">
+							<label for="m_2">m<sub>2</sub></label>
+							<input
+								type="number"
+								id="m_2"
+								min="0"
+								max="1"
+								step="0.01"
+								value="0.6"
+							/>
+						</div>
+						<div class="item">
+							<label for="g_1">g<sub>1</sub></label>
+							<input
+								type="number"
+								id="g_1"
+								min="0"
+								max="1"
+								step="0.01"
+								value="0.6"
+							/>
+						</div>
+						<div class="item">
+							<label for="g_2">g<sub>2</sub></label>
+							<input
+								type="number"
+								id="g_2"
+								min="0"
+								max="1"
+								step="0.01"
+								value="0.01"
+							/>
+						</div>
+						<div class="item">
+							<label for="alpha">&alpha;</label>
+							<input
+								type="number"
+								id="alpha"
+								min="0"
+								max="1"
+								step="0.01"
+								value="0.01"
+							/>
+						</div>
+						<div class="item">
+							<label for="beta">&beta;</label>
+							<input
+								type="number"
+								id="beta"
+								min="0"
+								max="1"
+								step="0.01"
+								value="0.2"
+							/>
+						</div>
+					</div>
+					<div id="general">
+						<label for="t">t</label>
+						<input
+							type="number"
+							id="t"
+							min="1"
+							max="1000"
+							value="100"
+						/>
+						<button id="solve">Solve</button>
+					</div>
+				</div>
+			</div>
+			<div id="plot"></div>
+		</div>
 
-            function plot(data) {
-                Plotly.purge("plot");
-                let input = [];
-                for (let i = 0; i < data[0].length; i++) {
-                    input.push({ y: data[i] });
-                }
+		<script type="module">
+			import "https://cdn.plot.ly/plotly-3.1.0-rc.0.min.js";
 
-                const layout = {
-                    title: "Lang Shift",
-                    xaxis: {
-                        title: "Time"
-                    },
-                    yaxis: {
-                        title: "Population"
-                    }
-                };
+			let { solve_abrams_strogatz, solve_diaz_switkes } = wasmBindings;
 
-                Plotly.newPlot("plot", input, layout);
-            }
-        </script>
-    </body>
+			const model = document.getElementById("model").value;
+			document.getElementById("abrams").style.display =
+				model === "abrams" ? "flex" : "none";
+			document.getElementById("diaz").style.display =
+				model === "diaz" ? "flex" : "none";
+
+			document
+				.getElementById("model")
+				.addEventListener("change", async (e) => {
+					const model = e.target.value;
+					document.getElementById("abrams").style.display =
+						model === "abrams" ? "flex" : "none";
+					document.getElementById("diaz").style.display =
+						model === "diaz" ? "flex" : "none";
+
+					await solve();
+				});
+
+			async function solve(e) {
+				const model = document.getElementById("model").value;
+				const params = {
+					abrams: {
+						x: Number(document.getElementById("x").value),
+						y: Number(document.getElementById("y").value),
+						c: Number(document.getElementById("c").value),
+						a: Number(document.getElementById("a").value),
+						s: Number(document.getElementById("s").value),
+					},
+					diaz: {
+						x_1: Number(document.getElementById("x_1").value),
+						x_2: Number(document.getElementById("x_2").value),
+						b: Number(document.getElementById("b").value),
+						m_1: Number(document.getElementById("m_1").value),
+						m_2: Number(document.getElementById("m_2").value),
+						g_1: Number(document.getElementById("g_1").value),
+						g_2: Number(document.getElementById("g_2").value),
+						alpha: Number(document.getElementById("alpha").value),
+						beta: Number(document.getElementById("beta").value),
+					},
+				}[model];
+				const t = document.getElementById("t").value;
+
+				if (model === "abrams") {
+					const solution = await solve_abrams_strogatz(
+						params.x,
+						params.y,
+						params.c,
+						params.a,
+						params.s,
+						t,
+					);
+					plot([
+						[solution, "Monolingual 1"],
+						[
+							solution.map((y) => params.x + params.y - y),
+							"Monolingual 2",
+						],
+					]);
+				} else {
+					const x = await solve_diaz_switkes(
+						[params.x_1, params.x_2, params.b],
+						[params.m_1, params.m_2],
+						[params.g_1, params.g_2],
+						params.alpha,
+						params.beta,
+						t,
+						0,
+					);
+					const b = await solve_diaz_switkes(
+						[params.x_1, params.x_2, params.b],
+						[params.m_1, params.m_2],
+						[params.g_1, params.g_2],
+						params.alpha,
+						params.beta,
+						t,
+						1,
+					);
+					plot([
+						[x, "Monlingual 1"],
+						[b, "Bilingual"],
+						[
+							x.map(
+								(y, i) =>
+									params.x_1 +
+									params.x_2 +
+									params.b -
+									(y + b[i]),
+							),
+							"Monlingual 2",
+						],
+					]);
+				}
+			}
+
+			document.getElementById("solve").addEventListener("click", solve);
+
+			solve();
+
+			function plot(data) {
+				Plotly.purge("plot");
+				let input = [];
+				for (let i = 0; i < data.length; i++) {
+					input.push({ y: data[i][0], name: `${data[i][1]}` });
+				}
+
+				const layout = {
+					title: "Lang Shift",
+					xaxis: {
+						title: "Time",
+					},
+					yaxis: {
+						title: "Population",
+					},
+				};
+
+				Plotly.newPlot("plot", input, layout);
+			}
+		</script>
+	</body>
 </html>
